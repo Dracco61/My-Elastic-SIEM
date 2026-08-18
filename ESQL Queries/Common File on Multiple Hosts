@@ -1,0 +1,10 @@
+FROM logs-*
+| WHERE file.hash.sha256 IS NOT NULL
+| WHERE host.name IN ("hostname", "hostname", "hostname")
+| STATS
+    host_count = COUNT_DISTINCT(host.name),
+    hosts = VALUES(host.name),
+    filenames = VALUES(file.name)
+BY file.hash.sha256
+| WHERE host_count > 1
+| SORT host_count DESC
