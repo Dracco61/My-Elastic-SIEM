@@ -1,0 +1,183 @@
+{
+  "name": "Refresh AD User Lookup Index",
+  "description": "Rebuilds ad-user-index-lookup from ad-user-index.",
+  "enabled": true,
+  "triggers": [
+    {
+      "type": "scheduled",
+      "with": {
+        "rrule": {
+          "freq": "DAILY",
+          "interval": 1,
+          "tzid": "America/Chicago", 
+          "byhour": [4],
+          "byminute": [30]
+        }
+      }
+    }
+  ],
+  "steps": [
+    {
+      "name": "delete_lookup_index",
+      "type": "elasticsearch.request",
+      "with": {
+        "method": "DELETE",
+        "path": "/ad-user-index-lookup"
+      }
+    },
+    {
+      "name": "create_lookup_index",
+      "type": "elasticsearch.request",
+      "with": {
+        "method": "PUT",
+        "path": "/ad-user-index-lookup",
+        "body": {
+          "settings": {
+            "index.mode": "lookup"
+          },
+          "mappings": {
+            "properties": {
+              "badPasswordTime": {
+                "type": "date"
+              },
+              "badPwdCount": {
+                "type": "integer"
+              },
+              "cn": {
+                "type": "keyword"
+              },
+              "department": {
+                "type": "keyword"
+              },
+              "distinguishedName": {
+                "type": "keyword"
+              },
+              "givenName": {
+                "type": "keyword"
+              },
+              "lastLogon": {
+                "type": "date"
+              },
+              "manager": {
+                "type": "keyword"
+              },
+              "objectCategory": {
+                "type": "keyword"
+              },
+              "objectSid": {
+                "type": "keyword"
+              },
+              "physicalDeliveryOfficeName": {
+                "type": "keyword"
+              },
+              "primaryGroupID": {
+                "type": "integer"
+              },
+              "pwdLastSet": {
+                "type": "date"
+              },
+              "related": {
+                "properties": {
+                  "user": {
+                    "type": "keyword"
+                  }
+                }
+              },
+              "serviceprincipalname": {
+                "type": "keyword"
+              },
+              "sn": {
+                "type": "keyword"
+              },
+              "telephoneNumber": {
+                "type": "keyword"
+              },
+              "title": {
+                "type": "keyword"
+              },
+              "user": {
+                "properties": {
+                  "full_name": {
+                    "type": "keyword"
+                  },
+                  "group": {
+                    "properties": {
+                      "name": {
+                        "type": "keyword"
+                      }
+                    }
+                  },
+                  "mail": {
+                    "type": "keyword"
+                  },
+                  "name": {
+                    "type": "keyword"
+                  }
+                }
+              },
+              "userPrincipalName": {
+                "type": "keyword"
+              },
+              "whenChanged": {
+                "type": "date"
+              },
+              "target": {
+                "properties": {
+                  "user": {
+                    "properties": {
+                      "name": {
+                        "type": "keyword"
+                      }
+                    }
+                  },
+                  "full": {
+                    "properties": {
+                      "name": {
+                        "type": "keyword"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "name": "reindex_ad_users",
+      "type": "elasticsearch.request",
+      "with": {
+        "method": "POST",
+        "path": "/_reindex",
+        "body": {
+          "source": {
+            "index": "ad-user-index",
+            "query": {
+              "bool": {
+                "must": [
+                  {
+                    "exists": {
+                      "field": "objectSid"
+                    }
+                  },
+                  {
+                    "exists": {
+                      "field": "user.name"
+                    }
+                  }
+                ]
+              }
+            }
+          },
+          "dest": {
+            "index": "ad-user-index-lookup"
+          },
+          "script": {
+            "source": "def target = ['user': ['name': ctx._source['user.name']]]; if (ctx._source.containsKey('user.full_name') && ctx._source['user.full_name'] != null) { target['full'] = ['name': ctx._source['user.full_name']]; } ctx._source['target'] = target;"
+          }
+        }
+      }
+    }
+  ]
+}
