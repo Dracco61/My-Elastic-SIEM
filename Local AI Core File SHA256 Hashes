@@ -1,0 +1,10 @@
+SHA256 hashes of core files for locally-installed AI applications for easy blacklisting.
+
+23a6a82cb0a4ae8f89a8cb01178045acb0c9579f7d45b01838286a4ef3f36bc5 -  ChatGPT Classic.exe 
+147b0cd2051f84e0aeb9918d03a7e15fc634c9adc779f0d8f5695844ba3170f8 -  claude.exe 
+ccc50629554116318e31c26fbf539808f6abc2d14fda9782afd57857e26b754c -  claude.exe 
+b5ce5b11e86f3af99fbcb376317b9b0195d001d870e94a3cfa66e5d449059e1c -  Copilot.dll 
+9798c43e5c198b67530d75cb6a4fa16846d996606fcc21286faaed55cf53c048 -  claude.exe 
+60208dacda0d382bb4238db2314a5fbc6b161cf0ded14dc289bd59784949bc10 -  AnythingLLM 
+552f934695e70d977f88cef5d5c57ecc2aac82f84d7bec78c1b8cdd93b250e74 -  Perplexity AI 
+3fe3fda152a5ad1cf23d8684689094bc38708e58eee181631267b106840ac672 -  codex.exe 
